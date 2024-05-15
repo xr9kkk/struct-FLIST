@@ -85,10 +85,127 @@ public:
     void create_by_queue(std::ifstream& file);
     void print(const char* message, std::ostream& stream = std::cout);
     void sorting();
+    void remove_odd_elements();
 };
 
+bool delete_all_even(Flist& list)
+{
+    bool result{};
+    ptrNode ptr = list.get_head();
+    while (!ptr->next)
+    {
+        if (ptr->next->info % 2 == 0)
+        {
+            list.del_after(ptr);
+            result = true;
+        }
+        else
+            ptr = ptr->next;
+    }
 
+    return result;
+}
 
+bool double_all_even(Flist& list)
+{
+    bool result{};
+    ptrNode ptr = list.get_head()->next;
+    while (ptr)
+    {
+        if (ptr->info % 2 == 0)
+        {
+            list.add_after(ptr, ptr->info);
+            result = true;
+            ptr = ptr->next->next;
+        }
+        else
+            ptr = ptr->next;
+    }
+    return result;
+}
+
+bool find_fragment_list_1(Flist& list, ptrNode& beg, ptrNode& end)
+{
+    auto one_parity = [](int x, int y)
+        {
+            return (x + y) % 2 == 0; 
+        };
+    beg = end = nullptr;
+    ptrNode head = list.get_head();
+    ptrNode ptr = head;
+    while (ptr->next)
+    {
+        if ((ptr == head || !one_parity(ptr->info, ptr->next->info)) && ptr->next->next && one_parity(ptr->next->info, ptr->next->next->info))
+            beg = ptr;
+        else if (one_parity(ptr->info, ptr->next->info) && (!ptr->next->next || (ptr->next->next && !one_parity(ptr->next->info, ptr->next->next->info))))
+            end = ptr->next; 
+        ptr = ptr->next; 
+    }
+    if (beg && end)
+        std::cout << beg->info << ' ' << end->info << '\n';
+    return end != nullptr;
+}
+
+bool find_fragment_list_2(Flist& list, ptrNode& beg, ptrNode& end)
+{
+    auto one_parity = [](int x, int y)
+        {
+            return (x + y) % 2 == 0;
+        };
+    beg = end = nullptr;
+    ptrNode head = list.get_head();
+    ptrNode ptr = head;
+    bool isBeg{};
+    while (ptr->next)
+    {
+        if (ptr->next->next && one_parity(ptr->next->info, ptr->next->next->info))
+        {
+            if (!isBeg)
+            {
+                beg = ptr;
+                isBeg = true;
+            }
+
+        }
+        else if (one_parity(ptr->info, ptr->next->info))
+        {
+            end = ptr->next;
+            isBeg = false;
+        }
+        ptr = ptr->next;
+    }
+    if (beg && end)
+        std::cout << beg->info << ' ' << end->info << '\n';
+    return end != nullptr;
+}
+
+bool task(Flist& list)
+{
+    ptrNode beg{}, end{};
+    bool res = find_fragment_list_1(list, beg, end);
+    if (res && end->next)
+    {
+        ptrNode tail = list.get_tail();
+        ptrNode tmp = beg->next;
+        beg->next = end->next;
+        end->next = tail;
+        tail->next = tmp;
+        list.set_tail(end);
+    }
+
+    ptrNode head = list.get_head();
+    if (beg != head)
+    {
+        ptrNode tmp = end->next;
+        end->next = head->next;
+        head->next = beg->next;
+        beg->next = tmp;
+        if (end == list.get_tail())
+            list.set_tail(beg);
+    }
+
+    return res;
+}
 
 int main()
 {
@@ -97,12 +214,15 @@ int main()
     if (file)
     {
         Flist list;
+        ptrNode beg{}, end{};
         list.create_by_queue(file);
         list.print("LIST:");
         std::cout << list.get_size() << '\n';
         std::cout << list.get_tail()->info << '\n';
         list.sorting();
         list.print("LIST Ordered:");
+        if (find_fragment_list_1(list, beg, end))
+            std::cout << "NO\n";
         std::cout << list.get_tail()->info << '\n';
 
 
@@ -216,3 +336,5 @@ void Flist::sorting()
         tail = hprev;
     }
 }
+
+
