@@ -1,34 +1,15 @@
 #include <iostream>
 #include <fstream>
 #include <functional>
-//на лабах нужно задачи нужно решать через переключление указателей
-
-//дз: нужно написать void clear(ptrNode begin, ptrNode end) то есть чтобы удалялось всё от определенного до определенного в листе.
-//Ещё надо удалить последний элемент 
-//написать find_if - поиск по условию сигнатура (ptrNode begin, ptrNode end, условие поиска в виде лямбды), возвращает ptrNode
-//найти сумму последнего и предпоследнего элемента списка, проверить обладает ли список заданным свойством (упор по возр, ариф прог) через лямбду
-//сформировать список из номеров макс элемов
-//поменять местами первые и последний эл из списка путем переключения списка
-
-//инициализая
-//1) создание пустого списка
-//2) проверка на пустоту
-//3) добавление элементов (в голову(в начало)), в хвост
-//4) удаление элемента из списка (тоже два варианта)
-//создание
-//1) по принципу стека
-//2) по принципу очереди
-//3) упорядоченно
-//обработка списка на примере функции печати
-//уничтожение списка(деструктор)
 
 using Tinfo = int;
+
 struct NODE
 {
     Tinfo info;
     NODE* next;
-    NODE(Tinfo info, NODE* ptr = nullptr) : info(info), next(ptr) {};
-    ~NODE() { next = nullptr; };
+    NODE(Tinfo info, NODE* ptr = nullptr) : info(info), next(ptr) {}
+    ~NODE() { next = nullptr; }
 };
 
 using ptrNode = NODE*;
@@ -37,11 +18,13 @@ struct Flist {
 private:
     ptrNode head, tail;
     size_t size;
+
     void adding_by_pointer(ptrNode& ptr, Tinfo elem)
     {
         ptr = new NODE(elem, ptr);
         ++size;
     }
+
     void del_by_pointer(ptrNode& ptr)
     {
         ptrNode p = ptr;
@@ -49,37 +32,21 @@ private:
         delete p;
         --size;
     }
+
 public:
     Flist()
     {
         tail = head = new NODE(0);
         size = 0;
     }
+
     ~Flist();
-    ptrNode get_head()
-    {
-        return head;
-    }
-    ptrNode get_tail()
-    {
-        return tail;
-    }
-    void set_tail(ptrNode ptr)
-    {
-        tail = ptr;
-    }
-    Tinfo get_elem(ptrNode ptr)
-    {
-        return ptr->info;
-    }
-    size_t get_size()
-    {
-        return size;
-    }
-    bool empty()
-    {
-        return !head->next;
-    }
+    ptrNode get_head() { return head; }
+    ptrNode get_tail() { return tail; }
+    void set_tail(ptrNode ptr) { tail = ptr; }
+    Tinfo get_elem(ptrNode ptr) { return ptr->info; }
+    size_t get_size() { return size; }
+    bool empty() { return !head->next; }
     void add_to_head(Tinfo elem);
     void add_to_tail(Tinfo elem);
     void add_after(ptrNode ptr, Tinfo elem);
@@ -89,158 +56,20 @@ public:
     void print(const char* message, std::ostream& stream = std::cout);
     void sorting();
     void remove_odd_elements();
+
+    void clear(ptrNode begin, ptrNode end);
+    void delete_last();
+    ptrNode find_if(ptrNode begin, ptrNode end, std::function<bool(Tinfo)> condition);
+    bool check_properties(std::function<bool(ptrNode)> property);
+    void print_max_elements_indices(std::ostream& stream = std::cout);
+    void swap_first_and_last();
 };
-
-bool delete_all_even(Flist& list)
-{
-    bool result{};
-    ptrNode ptr = list.get_head();
-    while (!ptr->next)
-    {
-        if (ptr->next->info % 2 == 0)
-        {
-            list.del_after(ptr);
-            result = true;
-        }
-        else
-            ptr = ptr->next;
-    }
-
-    return result;
-}
-
-bool double_all_even(Flist& list)
-{
-    bool result{};
-    ptrNode ptr = list.get_head()->next;
-    while (ptr)
-    {
-        if (ptr->info % 2 == 0)
-        {
-            list.add_after(ptr, ptr->info);
-            result = true;
-            ptr = ptr->next->next;
-        }
-        else
-            ptr = ptr->next;
-    }
-    return result;
-}
-
-bool find_fragment_list_1(Flist& list, ptrNode& beg, ptrNode& end)
-{
-    auto one_parity = [](int x, int y)
-        {
-            return (x + y) % 2 == 0; 
-        };
-    beg = end = nullptr;
-    ptrNode head = list.get_head();
-    ptrNode ptr = head;
-    while (ptr->next)
-    {
-        if ((ptr == head || !one_parity(ptr->info, ptr->next->info)) && ptr->next->next && one_parity(ptr->next->info, ptr->next->next->info))
-            beg = ptr;
-        else if (one_parity(ptr->info, ptr->next->info) && (!ptr->next->next || (ptr->next->next && !one_parity(ptr->next->info, ptr->next->next->info))))
-            end = ptr->next; 
-        ptr = ptr->next; 
-    }
-    if (beg && end)
-        std::cout << beg->info << ' ' << end->info << '\n';
-    return end != nullptr;
-}
-
-bool find_fragment_list_2(Flist& list, ptrNode& beg, ptrNode& end)
-{
-    auto one_parity = [](int x, int y)
-        {
-            return (x + y) % 2 == 0;
-        };
-    beg = end = nullptr;
-    ptrNode head = list.get_head();
-    ptrNode ptr = head;
-    bool isBeg{};
-    while (ptr->next)
-    {
-        if (ptr->next->next && one_parity(ptr->next->info, ptr->next->next->info))
-        {
-            if (!isBeg)
-            {
-                beg = ptr;
-                isBeg = true;
-            }
-
-        }
-        else if (one_parity(ptr->info, ptr->next->info))
-        {
-            end = ptr->next;
-            isBeg = false;
-        }
-        ptr = ptr->next;
-    }
-    if (beg && end)
-        std::cout << beg->info << ' ' << end->info << '\n';
-    return end != nullptr;
-}
-
-bool task(Flist& list)
-{
-    ptrNode beg{}, end{};
-    bool res = find_fragment_list_1(list, beg, end);
-    if (res && end->next)
-    {
-        ptrNode tail = list.get_tail();
-        ptrNode tmp = beg->next;
-        beg->next = end->next;
-        end->next = tail;
-        tail->next = tmp;
-        list.set_tail(end);
-    }
-
-    ptrNode head = list.get_head();
-    if (beg != head)
-    {
-        ptrNode tmp = end->next;
-        end->next = head->next;
-        head->next = beg->next;
-        beg->next = tmp;
-        if (end == list.get_tail())
-            list.set_tail(beg);
-    }
-
-    return res;
-}
-
-int main()
-{
-
-    std::ifstream file("data.txt");
-    if (file)
-    {
-        Flist list;
-        ptrNode beg{}, end{};
-        list.create_by_queue(file);
-        list.print("LIST:");
-        std::cout << list.get_size() << '\n';
-        std::cout << list.get_tail()->info << '\n';
-        list.sorting();
-        list.print("LIST Ordered:");
-        if (find_fragment_list_1(list, beg, end))
-            std::cout << "NO\n";
-        std::cout << list.get_tail()->info << '\n';
-
-
-    }
-
-    std::cin.get();
-    return 0;
-}
 
 Flist::~Flist()
 {
     while (!empty())
         del_from_head();
     delete head;
-    //head = tail = nullptr;
 }
 
 void Flist::add_to_head(Tinfo elem)
@@ -273,7 +102,6 @@ void Flist::del_from_head()
         del_by_pointer(head->next);
         if (!head->next)
             tail = head;
-
     }
 }
 
@@ -292,7 +120,6 @@ void Flist::create_by_queue(std::ifstream& file)
     Tinfo elem;
     while (file >> elem)
         add_to_tail(elem);
-
 }
 
 void Flist::print(const char* message, std::ostream& stream)
@@ -340,4 +167,169 @@ void Flist::sorting()
     }
 }
 
+// 1. Удаление элементов от begin до end (включительно)
+void Flist::clear(ptrNode begin, ptrNode end)
+{
+    while (begin != end->next) {
+        del_after(begin);
+    }
+}
 
+// 2. Удаление последнего элемента
+void Flist::delete_last()
+{
+    if (!empty())
+    {
+        ptrNode ptr = head;
+        while (ptr->next != tail) {
+            ptr = ptr->next;
+        }
+        del_by_pointer(ptr->next);
+        tail = ptr;
+    }
+}
+
+// 3. Поиск по условию
+ptrNode Flist::find_if(ptrNode begin, ptrNode end, std::function<bool(Tinfo)> condition)
+{
+    ptrNode result = nullptr;
+    while (begin != end && !result) {
+        if (condition(begin->info)) {
+            result = begin;
+        }
+        begin = begin->next;
+    }
+    return result;
+}
+
+// 4. Проверка свойств списка
+bool Flist::check_properties(std::function<bool(ptrNode)> property)
+{
+    bool result = property(head->next);
+    return result;
+}
+
+// 5. Сформировать список из номеров максимальных элементов
+void Flist::print_max_elements_indices(std::ostream& stream)
+{
+    if (!empty())
+    {
+        ptrNode ptr = head->next;
+        Tinfo max_value = ptr->info;
+        size_t index = 0, max_index = 0;
+        while (ptr) {
+            if (ptr->info > max_value) {
+                max_value = ptr->info;
+                max_index = index;
+            }
+            ptr = ptr->next;
+            ++index;
+        }
+
+        stream << "Max element indices: ";
+        ptr = head->next;
+        index = 0;
+        while (ptr) {
+            if (ptr->info == max_value) {
+                stream << index << ' ';
+            }
+            ptr = ptr->next;
+            ++index;
+        }
+        stream << '\n';
+    }
+}
+
+// 6. Поменять местами первые и последние элементы
+void Flist::swap_first_and_last()
+{
+    if (!empty() && head->next != tail)
+    {
+        ptrNode first = head->next;
+        ptrNode ptr = head;
+        while (ptr->next != tail) {
+            ptr = ptr->next;
+        }
+        ptr->next = head->next;
+        head->next = tail;
+        tail->next = first->next;
+        first->next = nullptr;
+        tail = first;
+    }
+}
+
+int main()
+{
+    std::ifstream file("data.txt");
+    if (file)
+    {
+        Flist list;
+        ptrNode beg{}, end{};
+        list.create_by_queue(file);
+        list.print("Initial LIST:");
+
+        // Пример использования функции clear
+        if (list.get_size() > 3) {
+            ptrNode clear_begin = list.get_head(); // Первый элемент списка
+            ptrNode clear_end = clear_begin->next->next; // Третий элемент списка
+            list.clear(clear_begin, clear_end);
+            list.print("LIST after clear:");
+        }
+
+        // Пример использования функции delete_last
+        list.delete_last();
+        list.print("LIST after deleting last element:");
+
+        // Пример использования функции find_if
+        ptrNode found = list.find_if(list.get_head()->next, list.get_tail(), [](Tinfo val) { return val % 2 == 0; });
+        if (found)
+            std::cout << "First even element found: " << found->info << '\n';
+        else
+            std::cout << "No even element found.\n";
+
+        // Пример использования функции check_properties для проверки упорядоченности по возрастанию
+        bool is_sorted = list.check_properties([](ptrNode ptr) {
+            bool sorted = true;
+            while (ptr && ptr->next) {
+                if (ptr->info > ptr->next->info)
+                    sorted = false;
+                ptr = ptr->next;
+            }
+            return sorted;
+            });
+        std::cout << "List is " << (is_sorted ? "sorted.\n" : "not sorted.\n");
+
+        // Пример использования функции check_properties для проверки арифметической прогрессии
+        bool is_arithmetic_progression = list.check_properties([](ptrNode ptr) {
+            bool arithmetic = true;
+            if (ptr && ptr->next) {
+                int diff = ptr->next->info - ptr->info;
+                ptr = ptr->next;
+                while (ptr && ptr->next) {
+                    if (ptr->next->info - ptr->info != diff)
+                        arithmetic = false;
+                    ptr = ptr->next;
+                }
+            }
+            return arithmetic;
+            });
+        std::cout << "List is " << (is_arithmetic_progression ? "an arithmetic progression.\n" : "not an arithmetic progression.\n");
+
+        // Пример использования функции print_max_elements_indices
+        list.print_max_elements_indices();
+
+        // Пример использования функции swap_first_and_last
+        list.swap_first_and_last();
+        list.print("LIST after swapping first and last elements:");
+
+        // Повторное добавление элементов для демонстрации удаления последнего элемента
+        list.add_to_tail(42);
+        list.add_to_tail(99);
+        list.print("LIST after adding elements:");
+        list.delete_last();
+        list.print("LIST after deleting last element:");
+    }
+
+    std::cin.get();
+    return 0;
+}
