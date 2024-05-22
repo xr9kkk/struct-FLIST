@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <functional>
+#include <string>
 
 using Tinfo = int;
 
@@ -167,29 +168,9 @@ void Flist::sorting()
     }
 }
 
-// 1. Удаление элементов от begin до end (включительно)
-void Flist::clear(ptrNode begin, ptrNode end)
-{
-    while (begin != end->next) {
-        del_after(begin);
-    }
-}
 
-// 2. Удаление последнего элемента
-void Flist::delete_last()
-{
-    if (!empty())
-    {
-        ptrNode ptr = head;
-        while (ptr->next != tail) {
-            ptr = ptr->next;
-        }
-        del_by_pointer(ptr->next);
-        tail = ptr;
-    }
-}
 
-// 3. Поиск по условию
+//Поиск по условию
 ptrNode Flist::find_if(ptrNode begin, ptrNode end, std::function<bool(Tinfo)> condition)
 {
     ptrNode result = nullptr;
@@ -202,133 +183,167 @@ ptrNode Flist::find_if(ptrNode begin, ptrNode end, std::function<bool(Tinfo)> co
     return result;
 }
 
-// 4. Проверка свойств списка
-bool Flist::check_properties(std::function<bool(ptrNode)> property)
-{
-    bool result = property(head->next);
-    return result;
-}
 
-// 5. Сформировать список из номеров максимальных элементов
-void Flist::print_max_elements_indices(std::ostream& stream)
+//void create_by_queue_1(ptrNode& ptr, std::ifstream& file) {
+//    int x{};
+//    if (file >> x)
+//    {
+//        ptr = new NODE(x);
+//        create_by_queue_1(ptr->next, file);
+//    }
+//}
+//
+//ptrNode create_by_queue_2(std::ifstream& file) {
+//    ptrNode ptr{};
+//    int x{};
+//    if (file >> x)
+//        ptr = new NODE(x, create_by_queue_2(file));
+//    return ptr;
+//}
+//
+//void insert_by_order(ptrNode& ptr, int x)
+//{
+//    if (!ptr || x < ptr->info)
+//        ptr = new NODE(x, ptr);
+//    else
+//        insert_by_order(ptr->next, x);
+//
+//}
+//void create_by_order(ptrNode& ptr, std::ifstream& file)
+//{
+//    int x{};
+//    if (file >> x)
+//    {
+//        insert_by_order(ptr, x);
+//        create_by_order(ptr, file);
+//    }
+//}
+//
+//
+//void clear(ptrNode& ptr) {
+//    if (ptr)
+//    {
+//        clear(ptr->next);
+//        delete ptr;
+//        ptr = nullptr;
+//    }
+//}
+//
+//
+//void print(const ptrNode& ptr)
+//{
+//    if (!ptr)
+//        std::cout << "\n";
+//    else
+//    {
+//        std::cout << ptr->info << " ";
+//        print(ptr->next);
+//    }
+//}
+//
+//std::string print_to_string(ptrNode ptr)
+//{
+//    std::string result{};
+//    if (ptr)
+//        result = std::to_string(ptr->info) + ' ' + print_to_string(ptr->next);
+//    return result;
+//}
+//
+//int summa(ptrNode ptr)
+//{
+//    int sum{};
+//    if (ptr)
+//        sum = ptr->info + summa(ptr->next);
+//    return sum;
+//}
+//
+//int count_even(ptrNode ptr)
+//{
+//    int cnt{};
+//    if (ptr)
+//        cnt = (ptr->info % 2 == 0 ? 1 : 0) + count_even(ptr->next);
+//    return cnt;
+//}
+//
+//
+//ptrNode first_even(ptrNode ptr)
+//{
+//    ptrNode res{};
+//    if (ptr)
+//        res = ptr->info % 2 == 0 ? ptr : first_even(ptr->next);
+//    return res;
+//}
+//
+//ptrNode last_even(ptrNode ptr) //написать эту таску, но на выходе из рекурсии
+//{
+//    ptrNode res{};
+//    if (ptr)
+//    {
+//        if (ptr->info % 2 == 0) res = ptr;
+//        res = last_even(ptr->next);
+//    }
+//    return res;
+//}
+//
+//void delete_all_even_1(ptrNode& ptr)
+//{
+//    if (ptr)
+//    {
+//        if (ptr->info % 2 == 0) { delete_from_head(ptr); delete_all_even_1(ptr); }
+//        else
+//            delete_all_even_1(ptr->next);
+//    }
+//}
+//
+//void delete_all_even_2(ptrNode& ptr)
+//{
+//    if (ptr) { delete_all_even_2(ptr->next); if (ptr->info % 2 == 0) delete_from_head(ptr); }
+//}
+//
+//ptrNode copy(ptrNode ptr)
+//{
+//    ptrNode res{};
+//    if (ptr) res = new NODE(ptr->info, copy(ptr->next));
+//    return res;
+//}
+
+
+void print_rec( ptrNode ptr)
 {
-    if (!empty())
+    if (!ptr)
+        std::cout << "\n";
+    else
     {
-        ptrNode ptr = head->next;
-        Tinfo max_value = ptr->info;
-        size_t index = 0, max_index = 0;
-        while (ptr) {
-            if (ptr->info > max_value) {
-                max_value = ptr->info;
-                max_index = index;
-            }
-            ptr = ptr->next;
-            ++index;
-        }
-
-        stream << "Max element indices: ";
-        ptr = head->next;
-        index = 0;
-        while (ptr) {
-            if (ptr->info == max_value) {
-                stream << index << ' ';
-            }
-            ptr = ptr->next;
-            ++index;
-        }
-        stream << '\n';
+        std::cout << ptr->info << " ";
+        print_rec(ptr->next);
     }
 }
 
-// 6. Поменять местами первые и последние элементы
-void Flist::swap_first_and_last()
+void print(Flist& list)
 {
-    if (!empty() && head->next != tail)
-    {
-        ptrNode first = head->next;
-        ptrNode ptr = head;
-        while (ptr->next != tail) {
-            ptr = ptr->next;
-        }
-        ptr->next = head->next;
-        head->next = tail;
-        tail->next = first->next;
-        first->next = nullptr;
-        tail = first;
-    }
+    print_rec(list.get_head()->next);
 }
+
+void double_first(Flist& list, ptrNode ptr)
+{
+    if (ptr) { if (ptr->info % 3 == 0) list.add_after(ptr, ptr->info); else double_first(list, ptr->next); }
+}
+
+void  delete_all_even(Flist& list)
+{
+    ptrNode head = list.get_head();
+    std::function<void(ptrNode&)> delete_all_even = [&delete_all_even, &list](ptrNode& head) {
+        if (head->next) { delete_all_even(head->next); if (head->next->info % 2 == 0) list.del_after(head); }};
+    delete_all_even(head);
+}
+
 
 int main()
 {
     std::ifstream file("data.txt");
-    if (file)
-    {
-        Flist list;
-        ptrNode beg{}, end{};
-        list.create_by_queue(file);
-        list.print("Initial LIST:");
-
-        // Пример использования функции clear
-        if (list.get_size() > 3) {
-            ptrNode clear_begin = list.get_head(); // Первый элемент списка
-            ptrNode clear_end = clear_begin->next->next; // Третий элемент списка
-            list.clear(clear_begin, clear_end);
-            list.print("LIST after clear:");
-        }
-
-        // Пример использования функции delete_last
-        list.delete_last();
-        list.print("LIST after deleting last element:");
-
-        // Пример использования функции find_if
-        ptrNode found = list.find_if(list.get_head()->next, list.get_tail(), [](Tinfo val) { return val % 2 == 0; });
-        if (found)
-            std::cout << "First even element found: " << found->info << '\n';
-        else
-            std::cout << "No even element found.\n";
-
-        // Пример использования функции check_properties для проверки упорядоченности по возрастанию
-        bool is_sorted = list.check_properties([](ptrNode ptr) {
-            bool sorted = true;
-            while (ptr && ptr->next) {
-                if (ptr->info > ptr->next->info)
-                    sorted = false;
-                ptr = ptr->next;
-            }
-            return sorted;
-            });
-        std::cout << "List is " << (is_sorted ? "sorted.\n" : "not sorted.\n");
-
-        // Пример использования функции check_properties для проверки арифметической прогрессии
-        bool is_arithmetic_progression = list.check_properties([](ptrNode ptr) {
-            bool arithmetic = true;
-            if (ptr && ptr->next) {
-                int diff = ptr->next->info - ptr->info;
-                ptr = ptr->next;
-                while (ptr && ptr->next) {
-                    if (ptr->next->info - ptr->info != diff)
-                        arithmetic = false;
-                    ptr = ptr->next;
-                }
-            }
-            return arithmetic;
-            });
-        std::cout << "List is " << (is_arithmetic_progression ? "an arithmetic progression.\n" : "not an arithmetic progression.\n");
-
-        // Пример использования функции print_max_elements_indices
-        list.print_max_elements_indices();
-
-        // Пример использования функции swap_first_and_last
-        list.swap_first_and_last();
-        list.print("LIST after swapping first and last elements:");
-
-        // Повторное добавление элементов для демонстрации удаления последнего элемента
-        list.add_to_tail(42);
-        list.add_to_tail(99);
-        list.print("LIST after adding elements:");
-        list.delete_last();
-        list.print("LIST after deleting last element:");
-    }
+    ptrNode head = new NODE( 0, create_by_queue_2(file));
+    std::cout << print_to_string(head->next)<< '\n';
+    clear(head);
 
     std::cin.get();
     return 0;
