@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 
+using namespace std;
 using Tinfo = int;
 
 struct NODE
@@ -183,168 +184,52 @@ ptrNode Flist::find_if(ptrNode begin, ptrNode end, std::function<bool(Tinfo)> co
     return result;
 }
 
-
-//void create_by_queue_1(ptrNode& ptr, std::ifstream& file) {
-//    int x{};
-//    if (file >> x)
-//    {
-//        ptr = new NODE(x);
-//        create_by_queue_1(ptr->next, file);
-//    }
-//}
-//
-//ptrNode create_by_queue_2(std::ifstream& file) {
-//    ptrNode ptr{};
-//    int x{};
-//    if (file >> x)
-//        ptr = new NODE(x, create_by_queue_2(file));
-//    return ptr;
-//}
-//
-//void insert_by_order(ptrNode& ptr, int x)
-//{
-//    if (!ptr || x < ptr->info)
-//        ptr = new NODE(x, ptr);
-//    else
-//        insert_by_order(ptr->next, x);
-//
-//}
-//void create_by_order(ptrNode& ptr, std::ifstream& file)
-//{
-//    int x{};
-//    if (file >> x)
-//    {
-//        insert_by_order(ptr, x);
-//        create_by_order(ptr, file);
-//    }
-//}
-//
-//
-//void clear(ptrNode& ptr) {
-//    if (ptr)
-//    {
-//        clear(ptr->next);
-//        delete ptr;
-//        ptr = nullptr;
-//    }
-//}
-//
-//
-//void print(const ptrNode& ptr)
-//{
-//    if (!ptr)
-//        std::cout << "\n";
-//    else
-//    {
-//        std::cout << ptr->info << " ";
-//        print(ptr->next);
-//    }
-//}
-//
-//std::string print_to_string(ptrNode ptr)
-//{
-//    std::string result{};
-//    if (ptr)
-//        result = std::to_string(ptr->info) + ' ' + print_to_string(ptr->next);
-//    return result;
-//}
-//
-//int summa(ptrNode ptr)
-//{
-//    int sum{};
-//    if (ptr)
-//        sum = ptr->info + summa(ptr->next);
-//    return sum;
-//}
-//
-//int count_even(ptrNode ptr)
-//{
-//    int cnt{};
-//    if (ptr)
-//        cnt = (ptr->info % 2 == 0 ? 1 : 0) + count_even(ptr->next);
-//    return cnt;
-//}
-//
-//
-//ptrNode first_even(ptrNode ptr)
-//{
-//    ptrNode res{};
-//    if (ptr)
-//        res = ptr->info % 2 == 0 ? ptr : first_even(ptr->next);
-//    return res;
-//}
-//
-//ptrNode last_even(ptrNode ptr) //написать эту таску, но на выходе из рекурсии
-//{
-//    ptrNode res{};
-//    if (ptr)
-//    {
-//        if (ptr->info % 2 == 0) res = ptr;
-//        res = last_even(ptr->next);
-//    }
-//    return res;
-//}
-//
-//void delete_all_even_1(ptrNode& ptr)
-//{
-//    if (ptr)
-//    {
-//        if (ptr->info % 2 == 0) { delete_from_head(ptr); delete_all_even_1(ptr); }
-//        else
-//            delete_all_even_1(ptr->next);
-//    }
-//}
-//
-//void delete_all_even_2(ptrNode& ptr)
-//{
-//    if (ptr) { delete_all_even_2(ptr->next); if (ptr->info % 2 == 0) delete_from_head(ptr); }
-//}
-//
-//ptrNode copy(ptrNode ptr)
-//{
-//    ptrNode res{};
-//    if (ptr) res = new NODE(ptr->info, copy(ptr->next));
-//    return res;
-//}
-
-
-void print_rec( ptrNode ptr)
-{
-    if (!ptr)
-        std::cout << "\n";
-    else
-    {
-        std::cout << ptr->info << " ";
-        print_rec(ptr->next);
+void remove_every_second_multiple_of_5(Flist& list) {
+    ptrNode ptr = list.get_head();
+    while (ptr && ptr->next) {
+        if (ptr->next->info % 5 == 0) {
+            list.del_after(ptr);
+        }
+        ptr = ptr->next;
+        if (ptr) {
+            ptr = ptr->next; // Переходим к следующему элементу, пропуская удаленный.
+        }
     }
 }
 
-void print(Flist& list)
-{
-    print_rec(list.get_head()->next);
+// Функция проверки наличия чисел, кратных 5, в списке.
+bool has_multiples_of_5( Flist& list) {
+    ptrNode current = list.get_head()->next;
+    while (current) {
+        if (current->info % 5 == 0) {
+            return true;
+        }
+        current = current->next;
+    }
+    return false;
 }
-
-void double_first(Flist& list, ptrNode ptr)
-{
-    if (ptr) { if (ptr->info % 3 == 0) list.add_after(ptr, ptr->info); else double_first(list, ptr->next); }
-}
-
-void  delete_all_even(Flist& list)
-{
-    ptrNode head = list.get_head();
-    std::function<void(ptrNode&)> delete_all_even = [&delete_all_even, &list](ptrNode& head) {
-        if (head->next) { delete_all_even(head->next); if (head->next->info % 2 == 0) list.del_after(head); }};
-    delete_all_even(head);
-}
-
 
 int main()
 {
-    std::ifstream file("data.txt");
-    ptrNode head = new NODE( 0, create_by_queue_2(file));
-    std::cout << print_to_string(head->next)<< '\n';
-    clear(head);
+    // Чтение целых чисел из файла input.txt и создание упорядоченного списка.
+    ifstream input_file("input.txt");
+    Flist list;
+    list.create_by_queue(input_file);
+    list.sorting();
 
-    std::cin.get();
+    remove_every_second_multiple_of_5(list);
+
+    // Проверка на наличие чисел кратных 5 в списке
+    
+
+    // Запись полученной последовательности или сообщения в файл output.txt.
+    ofstream output_file("output.txt");
+    if (has_multiples_of_5(list)) {
+        list.print("Modified sequence:", output_file);
+    }
+    else {
+        output_file << "There are no numbers divisible by 5 in the sequence." << endl;
+    }
+
     return 0;
 }
