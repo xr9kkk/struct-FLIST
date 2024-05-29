@@ -1,1 +1,2 @@
-There are no numbers divisible by 5 in the sequence.
+Modified sequence:
+1 2 3 4 5 

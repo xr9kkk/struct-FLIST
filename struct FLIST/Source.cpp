@@ -169,9 +169,7 @@ void Flist::sorting()
     }
 }
 
-
-
-//Поиск по условию
+// Поиск по условию
 ptrNode Flist::find_if(ptrNode begin, ptrNode end, std::function<bool(Tinfo)> condition)
 {
     ptrNode result = nullptr;
@@ -184,52 +182,69 @@ ptrNode Flist::find_if(ptrNode begin, ptrNode end, std::function<bool(Tinfo)> co
     return result;
 }
 
-void remove_every_second_multiple_of_5(Flist& list) {
+bool remove_every_second_multiple_of_5(Flist& list) {
     ptrNode ptr = list.get_head();
+    int count = 0;
+    bool res{ 0 };
+
     while (ptr && ptr->next) {
         if (ptr->next->info % 5 == 0) {
-            list.del_after(ptr);
+            count++;
+            if (count % 2 == 0) {
+                list.del_after(ptr);
+                res = true;
+            }
+            else {
+                ptr = ptr->next;
+            }
         }
-        ptr = ptr->next;
-        if (ptr) {
-            ptr = ptr->next; // Переходим к следующему элементу, пропуская удаленный.
+        else {
+            ptr = ptr->next; // указатель двигаем если не кратно  5
         }
     }
+    return res;
 }
 
+
 // Функция проверки наличия чисел, кратных 5, в списке.
-bool has_multiples_of_5( Flist& list) {
-    ptrNode current = list.get_head()->next;
-    while (current) {
-        if (current->info % 5 == 0) {
-            return true;
-        }
-        current = current->next;
-    }
-    return false;
-}
+//bool has_multiples_of_5(Flist& list) {
+//    bool mult_5{ 0 };
+//    ptrNode current = list.get_head()->next;
+//    while (current) {
+//        if (current->info % 5 == 0) {
+//            mult_5 = true;
+//        }
+//        current = current->next;
+//    }
+//    return mult_5;
+//}
 
 int main()
 {
-    // Чтение целых чисел из файла input.txt и создание упорядоченного списка.
     ifstream input_file("input.txt");
+    if (!input_file) {
+        cout << "Failed to open input file" << endl;
+    }
+
     Flist list;
     list.create_by_queue(input_file);
     list.sorting();
 
-    remove_every_second_multiple_of_5(list);
+   
 
-    // Проверка на наличие чисел кратных 5 в списке
-    
-
-    // Запись полученной последовательности или сообщения в файл output.txt.
     ofstream output_file("output.txt");
-    if (has_multiples_of_5(list)) {
-        list.print("Modified sequence:", output_file);
+    if (output_file) {
+        if (remove_every_second_multiple_of_5(list))
+            list.print("Modified sequence:", output_file);
+        else {
+            output_file << "There are no numbers divisible by 5 in the sequence." << endl;
+        }
     }
     else {
-        output_file << "There are no numbers divisible by 5 in the sequence." << endl;
+        output_file << "file error" << endl;
     }
+
+    
 
     return 0;
 }
